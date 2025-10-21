@@ -1,20 +1,13 @@
 import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import db from "../config/db.config.js";
-// import type { User } from "../../../shared/types.ts";
 import { RowDataPacket } from "mysql2";
 import { UserSchema, User } from "../validators/validators.js";
+import passport from "passport";
+import bcrypt from "bcrypt";
 
-async function getUserIdByEmail(email: String) {
-  try {
-    const [result] = await db.execute("SELECT userId FROM users WHERE email = ?", [email]);
-    return result;
-  } catch (err) {
-    console.log(err);
-  }
-}
-
-async function newUser(req: Request, res: Response) {
+// registration, login, authorization
+async function register(req: Request, res: Response) {
   const userId = uuidv4();
 
   const user: User = req.body;
@@ -27,6 +20,8 @@ async function newUser(req: Request, res: Response) {
     });
     return;
   }
+
+  const hashed = await bcrypt.hash(user.password, 10);
   //validation code
 
   try {
@@ -37,7 +32,7 @@ async function newUser(req: Request, res: Response) {
       userId.toString(),
       user.name,
       user.email,
-      user.password,
+      hashed,
       user.phone,
     ]);
     console.log(result);
@@ -48,18 +43,30 @@ async function newUser(req: Request, res: Response) {
 }
 
 async function login(req: Request, res: Response) {
-  const user: { email: string; password: string } = req.body;
-  //validation code
+  // const user: { email: string; password: string } = req.body;
+  // //validation code
 
-  try {
-    //return error if email already exists
-    const [result] = await db.execute<RowDataPacket[]>("SELECT email, password FROM users WHERE email = ?", [user.email]);
-    if (result.length == 0) throw new Error("user with this email doesn't exists");
-    if (user.password == result[0].password) console.log("logged in");
-  } catch (err) {
-    console.log(err);
-  }
-  res.send(user);
+  // try {
+  //   //return error if email already exists
+  //   const [result] = await db.execute<RowDataPacket[]>("SELECT email, password FROM users WHERE email = ?", [user.email]);
+  //   if (result.length == 0) throw new Error("user with this email doesn't exists");
+  //   if (user.password == result[0].password) console.log("logged in");
+  // } catch (err) {
+  //   console.log(err);
+  // }
+  res.send("Logged in successfully");
+}
+
+function logout(req: Request, res: Response) {
+  req.logout((err) => {
+    if (err) return res.status(500).send("Logout failed");
+    res.send("Logged out!");
+  });
+}
+
+function profile(req: Request, res: Response) {
+  if (!req.isAuthenticated()) return res.status(401).send("Not logged in");
+  res.json(req.user);
 }
 
 async function update(req: Request, res: Response) {
@@ -97,4 +104,16 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export default { newUser, login, update, remove };
+export async function findUserByEmail(email: string) {
+  const [rows]: any = await db.query("SELECT * FROM users WHERE email = ?", [email]);
+  const users = Array.isArray(rows) ? rows : [];
+  return users[0];
+}
+
+export async function findUserById(id: number) {
+  const [rows]: any = await db.query("SELECT * FROM users WHERE userId = ?", [id]);
+  const users = Array.isArray(rows) ? rows : [];
+  return users[0];
+}
+
+export default { register, login, logout, profile, update, remove, findUserByEmail, findUserById };

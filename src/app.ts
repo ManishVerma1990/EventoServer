@@ -1,5 +1,9 @@
 import express from "express";
+import session from "express-session";
+import passport from "passport";
 import "dotenv/config";
+import "./config/passport.js";
+
 import db from "./config/db.config.js";
 import { RowDataPacket } from "mysql2";
 // import bodyParser from "body-parser";
@@ -11,6 +15,17 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "default_secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 1000 * 60 * 60 }, // Set to true if using HTTPS
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use("/user", userRoute);
 app.use("/event", eventRoute);
 app.use("/registration", regRouter);
