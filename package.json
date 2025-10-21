@@ -1,0 +1,36 @@
+{
+  "name": "evento",
+  "version": "1.0.0",
+  "description": "event management and automation and analysis",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon ./dist/app.js & tsc -b --watch",
+    "build": "tsc --build",
+    "start": "nodemon ./dist/app.js & tsc -b --watch"
+  },
+  "author": "manish verma",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.0",
+    "concurrently": "^9.2.1",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "mysql2": "^3.14.3",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "uuid": "^11.1.0",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/express-session": "^1.18.2",
+    "@types/joi": "^17.2.2",
+    "@types/node": "^24.3.0",
+    "@types/passport-local": "^1.0.38",
+    "ts-node": "^11.0.0-beta.1"
+  }
+}
