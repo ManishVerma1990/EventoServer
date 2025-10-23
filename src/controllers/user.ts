@@ -5,6 +5,7 @@ import { RowDataPacket } from "mysql2";
 import { UserSchema, User } from "../validators/validators.js";
 import passport from "passport";
 import bcrypt from "bcrypt";
+import { get } from "http";
 
 // registration, login, authorization
 async function register(req: Request, res: Response) {
@@ -59,8 +60,12 @@ async function login(req: Request, res: Response) {
 
 function logout(req: Request, res: Response) {
   req.logout((err) => {
-    if (err) return res.status(500).send("Logout failed");
-    res.send("Logged out!");
+    if (err) return res.status(500).json({ message: "Logout failed" });
+    req.session.destroy((err) => {
+      if (err) return res.status(500).json({ message: "Session destroy failed" });
+      res.clearCookie("connect.sid"); // remove cookie from browser
+      res.json({ message: "Logged out" });
+    });
   });
 }
 
@@ -116,4 +121,17 @@ export async function findUserById(id: number) {
   return users[0];
 }
 
-export default { register, login, logout, profile, update, remove, findUserByEmail, findUserById };
+async function getUsersByEventId(req: Request, res: Response) {
+  try {
+    const [result] = await db.execute(
+      "SELECT u.userId, u.name, u.email, u.phone, r.registeredAt FROM users u JOIN registrations r ON u.userId = r.userId WHERE r.eventId = ?",
+      [req.params.id]
+    );
+    console.log(result);
+    res.send(result);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+export default { register, login, logout, profile, update, remove, getUsersByEventId };

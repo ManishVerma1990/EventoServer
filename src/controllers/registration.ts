@@ -1,7 +1,20 @@
 import { v4 as uuidv4 } from "uuid";
 import db from "../config/db.config.js";
-import e, { Request, Response } from "express";
+import { Request, Response } from "express";
 import { RegSchema, Registration } from "../validators/validators.js";
+
+async function checkEventCapacity(eventId: string): Promise<boolean> {
+  try {
+    const [eventResult]: any = await db.execute("SELECT capacity FROM events WHERE eventId = ?", [eventId]);
+    const eventCapacity = eventResult[0]?.capacity || 0;
+    const [regResult]: any = await db.execute("SELECT COUNT(*) as regCount FROM registrations WHERE eventId = ?", [eventId]);
+    const regCount = regResult[0]?.regCount || 0;
+    return regCount < eventCapacity;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}
 
 async function newRegistration(req: Request, res: Response) {
   const regId = uuidv4();
@@ -16,15 +29,20 @@ async function newRegistration(req: Request, res: Response) {
     });
     return;
   }
-
+  if (!(await checkEventCapacity(reg.eventId))) {
+    console.log("Event capacity reached");
+    return;
+  }
   try {
     const [result] = await db.execute(
       "INSERT INTO registrations (regId, eventId, userId, regType, checkIn, paymentStatus ) VALUES(?,?,?,?,?,?)",
       [regId, reg.eventId, reg.userId, reg.regType, reg.checkIn, reg.paymentStatus]
     );
     console.log(result);
+    res.send("registration added");
   } catch (error) {
     console.log(error);
+    res.send(error);
   }
 }
 

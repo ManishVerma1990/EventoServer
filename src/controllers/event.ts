@@ -17,6 +17,17 @@ async function listEvents(req: Request, res: Response) {
   console.log("list event");
 }
 
+async function getEventById(req: Request, res: Response) {
+  const eventId = req.params.id;
+  try {
+    const [result] = await db.execute<RowDataPacket[]>("SELECT * FROM events WHERE eventId = ?", [eventId]);
+    console.log(result);
+    res.send(result);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
 async function newEvent(req: Request, res: Response) {
   const eventId = uuidv4();
   const organizerId = "ed0e0cc3-58be-41b7-a581-d125640e4d7c";
@@ -101,4 +112,29 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export default { newEvent, listEvents, update, remove };
+async function getParticipants(req: Request, res: Response) {
+  try {
+    const [result] = await db.execute(
+      "SELECT u.userId, u.name, u.email FROM users u JOIN registrations r ON u.userId = r.userId WHERE r.eventId = ?",
+      [req.body.eventId]
+    );
+    console.log(result);
+    res.send(result);
+  } catch (err) {
+    console.log(err);
+    res.send(err);
+  }
+}
+
+async function getEventsByOrganizerId(req: Request, res: Response) {
+  const organizerId = req.params.organizerId;
+  try {
+    const [result] = await db.execute<RowDataPacket[]>("SELECT * FROM events WHERE organizerId = ?", [organizerId]);
+    console.log(result);
+    res.send(result);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+export default { newEvent, listEvents, update, remove, getParticipants, getEventById, getEventsByOrganizerId };

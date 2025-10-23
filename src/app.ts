@@ -3,9 +3,10 @@ import session from "express-session";
 import passport from "passport";
 import "dotenv/config";
 import "./config/passport.js";
+import cors from "cors";
 
 import db from "./config/db.config.js";
-import { RowDataPacket } from "mysql2";
+// import { RowDataPacket } from "mysql2";
 // import bodyParser from "body-parser";
 import userRoute from "./routes/userRoute.js";
 import eventRoute from "./routes/eventRoute.js";
@@ -25,6 +26,13 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use(
+  cors({
+    origin: "http://localhost:5173", // allow requests from Vite dev server
+    credentials: true, // allow cookies if needed
+  })
+);
 
 app.use("/user", userRoute);
 app.use("/event", eventRoute);

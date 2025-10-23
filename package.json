@@ -12,9 +12,11 @@
   "author": "manish verma",
   "license": "ISC",
   "dependencies": {
+    "@types/cors": "^2.8.19",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "concurrently": "^9.2.1",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "express-session": "^1.18.2",

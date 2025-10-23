@@ -10,7 +10,7 @@ router.post("/register", (req: Request, res: Response) => {
   userController.register(req, res);
 });
 
-router.get("/login", passport.authenticate("local"), (req: Request, res: Response) => {
+router.post("/login", passport.authenticate("local"), (req: Request, res: Response) => {
   userController.login(req, res);
 });
 
@@ -28,6 +28,18 @@ router.put("/update", (req: Request, res: Response) => {
 
 router.delete("/delete", (req: Request, res: Response) => {
   userController.remove(req, res);
+});
+
+router.get("/me", (req: Request, res: Response) => {
+  if (req.isAuthenticated()) {
+    res.json({ user: req.user }); // req.user comes from Passport session
+  } else {
+    res.status(401).json({ user: null });
+  }
+});
+
+router.get("/event/:id", (req: Request, res: Response) => {
+  userController.getUsersByEventId(req, res);
 });
 
 export default router;
