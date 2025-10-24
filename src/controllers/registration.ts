@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import db from "../config/db.config.js";
 import { Request, Response } from "express";
 import { RegSchema, Registration } from "../validators/validators.js";
+import { get } from "http";
 
 async function checkEventCapacity(eventId: string): Promise<boolean> {
   try {
@@ -20,14 +21,14 @@ async function newRegistration(req: Request, res: Response) {
   const regId = uuidv4();
 
   const reg: Registration = req.body;
-  const validReg: any = RegSchema.safeParse(reg);
+  const validReg = RegSchema.safeParse(reg);
 
   if (!validReg.success) {
     console.log("Invalid registration");
-    validReg.error.forEach((element: any) => {
-      console.log({ path: element.path, msg: element.messege });
+    validReg.error.issues.forEach((issue) => {
+      console.log({ path: issue.path, msg: issue.message });
     });
-    return;
+    return res.status(400).send("Invalid registration data");
   }
   if (!(await checkEventCapacity(reg.eventId))) {
     console.log("Event capacity reached");
@@ -90,4 +91,14 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export default { newRegistration, listRegistrations, update, remove };
+async function getRegistrationsByUser(req: Request, res: Response) {
+  try {
+    const [result] = await db.execute("SELECT * FROM registrations WHERE userId = ?", [req.params.userId]);
+    console.log(result);
+    res.send(result);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+export default { newRegistration, listRegistrations, update, remove, getRegistrationsByUser };

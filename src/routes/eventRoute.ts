@@ -24,7 +24,7 @@ router.delete("/delete", (req: Request, res: Response) => {
   eventController.remove(req, res);
 });
 
-router.get("/participants", (req: Request, res: Response) => {
+router.get("/:id/participants", (req: Request, res: Response) => {
   eventController.getParticipants(req, res);
 });
 

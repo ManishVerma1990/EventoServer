@@ -38,6 +38,10 @@ router.get("/me", (req: Request, res: Response) => {
   }
 });
 
+router.get("/:id", (req: Request, res: Response) => {
+  userController.getUserById(req, res);
+});
+
 router.get("/event/:id", (req: Request, res: Response) => {
   userController.getUsersByEventId(req, res);
 });

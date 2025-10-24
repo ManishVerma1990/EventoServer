@@ -20,4 +20,8 @@ router.delete("/delete", (req: Request, res: Response) => {
   regController.remove(req, res);
 });
 
+router.get("/user/:userId", (req: Request, res: Response) => {
+  regController.getRegistrationsByUser(req, res);
+});
+
 export default router;

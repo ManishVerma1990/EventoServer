@@ -134,4 +134,15 @@ async function getUsersByEventId(req: Request, res: Response) {
   }
 }
 
-export default { register, login, logout, profile, update, remove, getUsersByEventId };
+async function getUserById(req: Request, res: Response) {
+  try {
+    console.log("Getting user by ID:", req.params.id);
+    const [result] = await db.execute("SELECT * FROM users WHERE userId = ?", [req.params.id]);
+    console.log(result);
+    res.send(result);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+export default { register, login, logout, profile, update, remove, getUsersByEventId, getUserById };

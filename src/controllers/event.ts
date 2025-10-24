@@ -30,10 +30,10 @@ async function getEventById(req: Request, res: Response) {
 
 async function newEvent(req: Request, res: Response) {
   const eventId = uuidv4();
-  const organizerId = "ed0e0cc3-58be-41b7-a581-d125640e4d7c";
 
   const event: Event = req.body;
   const validEvent: any = EventSchema.safeParse(event);
+  console.log(event);
 
   if (validEvent.success) {
     console.log("Invalid Event");
@@ -113,10 +113,11 @@ async function remove(req: Request, res: Response) {
 }
 
 async function getParticipants(req: Request, res: Response) {
+  console.log("Getting participants for event:", req.params.id);
   try {
     const [result] = await db.execute(
-      "SELECT u.userId, u.name, u.email FROM users u JOIN registrations r ON u.userId = r.userId WHERE r.eventId = ?",
-      [req.body.eventId]
+      "SELECT u.userId, u.name, u.email, u.phone FROM users u JOIN registrations r ON u.userId = r.userId WHERE r.eventId = ?",
+      [req.params.id]
     );
     console.log(result);
     res.send(result);
