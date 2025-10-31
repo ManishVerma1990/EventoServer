@@ -12,6 +12,10 @@ router.get("/:id", (req: Request, res: Response) => {
   eventController.getEventById(req, res);
 });
 
+router.get("/name/:name", (req: Request, res: Response) => {
+  eventController.getEventByName(req, res);
+});
+
 router.post("/new", (req: Request, res: Response) => {
   eventController.newEvent(req, res);
 });

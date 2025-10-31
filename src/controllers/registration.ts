@@ -20,6 +20,23 @@ async function checkEventCapacity(eventId: string): Promise<boolean> {
 async function newRegistration(req: Request, res: Response) {
   const regId = uuidv4();
 
+  function checkIfUserRegistered(eventId: string, userId: string): Promise<boolean> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const [result]: any = await db.execute("SELECT * FROM registrations WHERE eventId = ? AND userId = ?", [eventId, userId]);
+        resolve(result.length > 0);
+      } catch (error) {
+        console.log(error);
+        reject(false);
+      }
+    });
+  }
+
+  if (await checkIfUserRegistered(req.body.eventId, req.body.userId)) {
+    console.log("User already registered for this event");
+    return res.status(400).send("User already registered for this event");
+  }
+
   const reg: Registration = req.body;
   const validReg = RegSchema.safeParse(reg);
 
@@ -93,7 +110,9 @@ async function remove(req: Request, res: Response) {
 
 async function getRegistrationsByUser(req: Request, res: Response) {
   try {
-    const [result] = await db.execute("SELECT * FROM registrations WHERE userId = ?", [req.params.userId]);
+    const [result] = await db.execute("SELECT * FROM registrations r JOIN events e ON r.eventId = e.eventId WHERE r.userId = ?", [
+      req.params.userId,
+    ]);
     console.log(result);
     res.send(result);
   } catch (err) {

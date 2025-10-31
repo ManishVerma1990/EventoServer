@@ -138,4 +138,15 @@ async function getEventsByOrganizerId(req: Request, res: Response) {
   }
 }
 
-export default { newEvent, listEvents, update, remove, getParticipants, getEventById, getEventsByOrganizerId };
+async function getEventByName(req: Request, res: Response) {
+  try {
+    console.log(req.params.name);
+    const [result] = await db.execute<RowDataPacket[]>("SELECT * FROM events WHERE title LIKE CONCAT('%', ?, '%')", [req.params.name]);
+    res.send(result);
+  } catch (err) {
+    console.log(err);
+    res.send(err);
+  }
+}
+
+export default { newEvent, listEvents, update, remove, getParticipants, getEventById, getEventsByOrganizerId, getEventByName };
